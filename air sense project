@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AirSense - Smart Air Quality</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    min-height:100vh;
+    color:#eef8ff;
+    background:
+        radial-gradient(circle at 20% 10%,#073b70,transparent 30%),
+        linear-gradient(135deg,#021326,#052440,#021426);
+}
+
+.header{
+    height:68px;
+    padding:10px 28px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:linear-gradient(90deg,#073c78,#075184,#06345e);
+    border-bottom:1px solid #2171a3;
+}
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.logo-icon{
+    font-size:35px;
+}
+
+.logo h1{
+    font-size:25px;
+}
+
+.logo h1 span{
+    color:#22ef7a;
+}
+
+.logo p{
+    font-size:10px;
+    color:#a9c5db;
+}
+
+.top-right{
+    display:flex;
+    align-items:center;
+    gap:20px;
+    font-size:11px;
+}
+
+.status-dot{
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    display:inline-block;
+    background:#ff4040;
+    margin-right:5px;
+}
+
+.status-dot.online{
+    background:#20ef79;
+    box-shadow:0 0 10px #20ef79;
+}
+
+.connect-btn{
+    border:0;
+    padding:9px 16px;
+    border-radius:6px;
+    background:#19d875;
+    color:#031a12;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.connect-btn:hover{
+    background:#35ef8a;
+}
+
+.container{
+    width:min(1200px,calc(100% - 25px));
+    margin:15px auto 30px;
+}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+}
+
+.card{
+    min-height:110px;
+    padding:14px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    border:1px solid #174a70;
+    border-radius:8px;
+    background:linear-gradient(145deg,#092f50,#041d35);
+}
+
+.icon{
+    width:50px;
+    height:50px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    font-weight:bold;
+}
+
+.pm .icon{
+    background:linear-gradient(135deg,#a24cff,#6417b7);
+}
+
+.co2 .icon{
+    background:linear-gradient(135deg,#2be69b,#087d54);
+}
+
+.temp .icon{
+    background:linear-gradient(135deg,#ffad4b,#d75d08);
+}
+
+.hum .icon{
+    background:linear-gradient(135deg,#35a8ff,#0767c5);
+}
+
+.label{
+    color:#bdd2e4;
+    font-size:11px;
+}
+
+.value{
+    font-size:26px;
+    font-weight:bold;
+    margin-top:4px;
+}
+
+.unit{
+    color:#9eb8cd;
+    font-size:11px;
+    font-weight:normal;
+}
+
+.good{
+    color:#20ef79;
+    font-size:10px;
+    margin-top:6px;
+}
+
+.warning{
+    color:#ffb020;
+}
+
+.danger{
+    color:#ff5050;
+}
+
+.aqi-card{
+    grid-column:1/-1;
+    min-height:115px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:18px;
+    border:1px solid #19704d;
+    border-radius:8px;
+    background:linear-gradient(135deg,#063e42,#06372c);
+}
+
+.aqi-ring{
+    width:90px;
+    height:90px;
+    position:relative;
+}
+
+.aqi-ring svg{
+    width:100%;
+    height:100%;
+    transform:rotate(-90deg);
+}
+
+.aqi-ring circle{
+    fill:none;
+    stroke-width:7;
+}
+
+.ring-bg{
+    stroke:#ffffff12;
+}
+
+.ring-value{
+    stroke:#20ef79;
+    stroke-linecap:round;
+    stroke-dasharray:251;
+    stroke-dashoffset:251;
+    transition:.5s;
+}
+
+.aqi-number{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+}
+
+.aqi-number b{
+    font-size:22px;
+}
+
+.aqi-number span{
+    font-size:9px;
+    color:#20ef79;
+}
+
+.aqi-title{
+    font-size:11px;
+    color:#bdd4e5;
+}
+
+.aqi-quality{
+    font-size:22px;
+    font-weight:bold;
+    color:#20ef79;
+    margin-top:4px;
+}
+
+.charts{
+    margin-top:10px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+}
+
+.panel{
+    padding:12px;
+    border:1px solid #174a70;
+    border-radius:8px;
+    background:linear-gradient(145deg,#082a49,#03182d);
+}
+
+.chart-box{
+    height:240px;
+}
+
+.panel-title{
+    font-size:12px;
+    margin-bottom:8px;
+}
+
+canvas{
+    width:100%!important;
+    height:195px!important;
+}
+
+.bottom{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+    margin-top:10px;
+}
+
+.bottom .panel{
+    min-height:205px;
+}
+
+.title{
+    font-size:12px;
+    padding-bottom:9px;
+    border-bottom:1px solid #31557344;
+    margin-bottom:7px;
+}
+
+.sensor{
+    height:38px;
+    padding:0 9px;
+    margin-bottom:6px;
+    border-radius:6px;
+    background:#092f4d;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-size:10px;
+}
+
+.sensor-status{
+    color:#20ef79;
+    font-weight:bold;
+}
+
+.info,
+.live{
+    height:34px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border-bottom:1px solid #31557333;
+    font-size:10px;
+}
+
+.info span,
+.live span{
+    color:#bdd3e4;
+}
+
+.info b,
+.live b{
+    color:white;
+}
+
+.footer{
+    margin-top:10px;
+    padding:16px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border:1px solid #20d87844;
+    border-radius:8px;
+    background:linear-gradient(135deg,#063d3b,#06372c);
+}
+
+.footer strong{
+    font-size:20px;
+}
+
+.footer span{
+    font-size:10px;
+    color:#a9d9bf;
+}
+
+@media(max-width:900px){
+    .cards{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .charts,
+    .bottom{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:600px){
+    .header{
+        height:auto;
+        gap:10px;
+        padding:12px;
+        align-items:flex-start;
+    }
+
+    .top-right{
+        flex-direction:column;
+        gap:7px;
+    }
+
+    .cards{
+        grid-template-columns:1fr;
+    }
+
+    .aqi-card{
+        grid-column:auto;
+    }
+
+    .container{
+        width:calc(100% - 14px);
+    }
+
+    .footer{
+        flex-direction:column;
+        gap:8px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header class="header">
+
+    <div class="logo">
+        <div class="logo-icon">🌿</div>
+
+        <div>
+            <h1>Air<span>Sense</span></h1>
+            <p>Smart Air Quality Detection & Advisory System</p>
+        </div>
+    </div>
+
+    <div class="top-right">
+
+        <div>
+            <span id="dot" class="status-dot"></span>
+            <span id="connection">Device Offline</span>
+        </div>
+
+        <div>📶 USB / Serial</div>
+
+        <div id="clock">--:--:--</div>
+
+        <button class="connect-btn" onclick="connectESP32()">
+            Connect ESP32
+        </button>
+
+    </div>
+
+</header>
+
+
+<main class="container">
+
+
+<!-- ================= CARDS ================= -->
+
+<section class="cards">
+
+
+<div class="card pm">
+
+    <div class="icon">•••</div>
+
+    <div>
+        <div class="label">PM2.5</div>
+
+        <div class="value">
+            <span id="pm25">--</span>
+            <span class="unit">µg/m³</span>
+        </div>
+
+        <div id="pmStatus" class="good">
+            Waiting
+        </div>
+    </div>
+
+</div>
+
+
+<div class="card co2">
+
+    <div class="icon">CO₂</div>
+
+    <div>
+        <div class="label">CO₂</div>
+
+        <div class="value">
+            <span id="co2">--</span>
+            <span class="unit">ppm</span>
+        </div>
+
+        <div id="co2Status" class="good">
+            Waiting
+        </div>
+    </div>
+
+</div>
+
+
+<div class="card temp">
+
+    <div class="icon">🌡</div>
+
+    <div>
+        <div class="label">Temperature</div>
+
+        <div class="value">
+            <span id="temperature">--</span>
+            <span class="unit">°C</span>
+        </div>
+
+        <div class="good">
+            Normal
+        </div>
+    </div>
+
+</div>
+
+
+<div class="card hum">
+
+    <div class="icon">💧</div>
+
+    <div>
+        <div class="label">Humidity</div>
+
+        <div class="value">
+            <span id="humidity">--</span>
+            <span class="unit">%</span>
+        </div>
+
+        <div class="good">
+            Comfortable
+        </div>
+    </div>
+
+</div>
+
+
+<!-- AQI -->
+
+<div class="aqi-card">
+
+    <div class="aqi-ring">
+
+        <svg viewBox="0 0 100 100">
+
+            <circle
+                class="ring-bg"
+                cx="50"
+                cy="50"
+                r="40">
+            </circle>
+
+            <circle
+                id="aqiRing"
+                class="ring-value"
+                cx="50"
+                cy="50"
+                r="40">
+            </circle>
+
+        </svg>
+
+        <div class="aqi-number">
+
+            <b id="aqi">--</b>
+
+            <span>AQI</span>
+
+        </div>
+
+    </div>
+
+    <div>
+
+        <div class="aqi-title">
+            Overall Air Quality
+        </div>
+
+        <div id="aqiQuality" class="aqi-quality">
+            Waiting
+        </div>
+
+    </div>
+
+</div>
+
+</section>
+
+
+<!-- ================= CHARTS ================= -->
+
+<section class="charts">
+
+
+<div class="panel chart-box">
+
+    <div class="panel-title">
+        PM2.5 Level
+    </div>
+
+    <canvas id="pmCanvas"></canvas>
+
+</div>
+
+
+<div class="panel chart-box">
+
+    <div class="panel-title">
+        CO₂ Level
+    </div>
+
+    <canvas id="co2Canvas"></canvas>
+
+</div>
+
+
+<div class="panel chart-box">
+
+    <div class="panel-title">
+        Temperature & Humidity
+    </div>
+
+    <canvas id="envCanvas"></canvas>
+
+</div>
+
+
+</section>
+
+
+<!-- ================= BOTTOM ================= -->
+
+<section class="bottom">
+
+
+<div class="panel">
+
+    <div class="title">
+        ⚙ Sensor Status
+    </div>
+
+    <div class="sensor">
+        <span>🟣 PMS5003</span>
+        <b id="pmsSensor" class="sensor-status">● Waiting</b>
+    </div>
+
+    <div class="sensor">
+        <span>🟢 MH-Z19B</span>
+        <b id="mhzSensor" class="sensor-status">● Waiting</b>
+    </div>
+
+    <div class="sensor">
+        <span>🟠 BME688</span>
+        <b id="bmeSensor" class="sensor-status">● Waiting</b>
+    </div>
+
+    <div class="sensor">
+        <span>🔵 ESP32</span>
+        <b id="espSensor" class="sensor-status">● Waiting</b>
+    </div>
+
+</div>
+
+
+<div class="panel">
+
+    <div class="title">
+        ⚙ Device Info
+    </div>
+
+    <div class="info">
+        <span>Board</span>
+        <b>ESP32</b>
+    </div>
+
+    <div class="info">
+        <span>Connection</span>
+        <b id="connectionType">USB Serial</b>
+    </div>
+
+    <div class="info">
+        <span>Status</span>
+        <b id="deviceStatus">Disconnected</b>
+    </div>
+
+    <div class="info">
+        <span>Last Update</span>
+        <b id="lastUpdate">--</b>
+    </div>
+
+</div>
+
+
+<div class="panel">
+
+    <div class="title">
+        〽 Live Data
+    </div>
+
+    <div class="live">
+        <span>PM2.5</span>
+        <b><span id="livePM">--</span> µg/m³</b>
+    </div>
+
+    <div class="live">
+        <span>CO₂</span>
+        <b><span id="liveCO2">--</span> ppm</b>
+    </div>
+
+    <div class="live">
+        <span>Temperature</span>
+        <b><span id="liveTemp">--</span> °C</b>
+    </div>
+
+    <div class="live">
+        <span>Humidity</span>
+        <b><span id="liveHumidity">--</span> %</b>
+    </div>
+
+    <div class="live">
+        <span>AQI</span>
+        <b id="liveAQI">--</b>
+    </div>
+
+</div>
+
+
+</section>
+
+
+<div class="footer">
+    <strong>🌿 AirSense</strong>
+    <span>Better Data → Healthier Life</span>
+</div>
+
+
+</main>
+
+
+<script>
+
+/* =====================================================
+   AIRSENSE JAVASCRIPT
+   ===================================================== */
+
+let port = null;
+let reader = null;
+let buffer = "";
+
+const MAX_POINTS = 30;
+
+const pmValues = [];
+const co2Values = [];
+const tempValues = [];
+const humidityValues = [];
+
+
+/* =====================================================
+   CANVAS
+   ===================================================== */
+
+function setupCanvas(id){
+    const canvas = document.getElementById(id);
+    const ctx = canvas.getContext("2d");
+
+    function resize(){
+        const ratio = window.devicePixelRatio || 1;
+
+        canvas.width =
+            canvas.clientWidth * ratio;
+
+        canvas.height =
+            canvas.clientHeight * ratio;
+
+        ctx.scale(ratio,ratio);
+    }
+
+    resize();
+
+    window.addEventListener("resize",resize);
+
+    return ctx;
+}
+
+const pmCtx = setupCanvas("pmCanvas");
+const co2Ctx = setupCanvas("co2Canvas");
+const envCtx = setupCanvas("envCanvas");
+
+
+/* =====================================================
+   DRAW GRAPH
+   ===================================================== */
+
+function drawGraph(
+    ctx,
+    values,
+    color,
+    maxValue
+){
+
+    const canvas = ctx.canvas;
+
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+
+    ctx.clearRect(0,0,w,h);
+
+    /* GRID */
+
+    ctx.strokeStyle = "rgba(255,255,255,.07)";
+    ctx.lineWidth = 1;
+
+    for(let i=1;i<5;i++){
+
+        const y =
+            (h/5)*i;
+
+        ctx.beginPath();
+
+        ctx.moveTo(0,y);
+
+        ctx.lineTo(w,y);
+
+        ctx.stroke();
+    }
+
+    if(values.length < 2){
+        return;
+    }
+
+    /* LINE */
+
+    ctx.beginPath();
+
+    values.forEach((value,index)=>{
+
+        const x =
+            index *
+            (w/(MAX_POINTS-1));
+
+        const y =
+            h -
+            (value/maxValue)*h;
+
+        if(index === 0){
+            ctx.moveTo(x,y);
+        }else{
+            ctx.lineTo(x,y);
+        }
+
+    });
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    /* DOTS */
+
+    values.forEach((value,index)=>{
+
+        const x =
+            index *
+            (w/(MAX_POINTS-1));
+
+        const y =
+            h -
+            (value/maxValue)*h;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            x,
+            y,
+            2.5,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fillStyle = color;
+
+        ctx.fill();
+
+    });
+
+}
+
+
+/* =====================================================
+   ENVIRONMENT GRAPH
+   ===================================================== */
+
+function drawEnvironment(){
+
+    const canvas =
+        envCtx.canvas;
+
+    const w =
+        canvas.clientWidth;
+
+    const h =
+        canvas.clientHeight;
+
+    envCtx.clearRect(
+        0,
+        0,
+        w,
+        h
+    );
+
+    envCtx.strokeStyle =
+        "rgba(255,255,255,.07)";
+
+    for(let i=1;i<5;i++){
+
+        const y =
+            h/5*i;
+
+        envCtx.beginPath();
+
+        envCtx.moveTo(0,y);
+
+        envCtx.lineTo(w,y);
+
+        envCtx.stroke();
+
+    }
+
+    if(tempValues.length < 2){
+        return;
+    }
+
+    drawLine(
+        envCtx,
+        tempValues,
+        "#ff8b20",
+        50
+    );
+
+    drawLine(
+        envCtx,
+        humidityValues,
+        "#1595ff",
+        100
+    );
+
+}
+
+
+function drawLine(
+    ctx,
+    values,
+    color,
+    maxValue
+){
+
+    const w =
+        ctx.canvas.clientWidth;
+
+    const h =
+        ctx.canvas.clientHeight;
+
+    ctx.beginPath();
+
+    values.forEach(
+        (value,index)=>{
+
+            const x =
+                index *
+                (w/(MAX_POINTS-1));
+
+            const y =
+                h -
+                (value/maxValue)*h;
+
+            if(index===0){
+                ctx.moveTo(x,y);
+            }else{
+                ctx.lineTo(x,y);
+            }
+
+        }
+    );
+
+    ctx.strokeStyle =
+        color;
+
+    ctx.lineWidth = 2;
+
+    ctx.stroke();
+
+}
+
+
+/* =====================================================
+   UPDATE GRAPH DATA
+   ===================================================== */
+
+function updateGraphs(
+    pm,
+    co2,
+    temp,
+    humidity
+){
+
+    pmValues.push(pm);
+    co2Values.push(co2);
+    tempValues.push(temp);
+    humidityValues.push(humidity);
+
+    if(pmValues.length > MAX_POINTS){
+
+        pmValues.shift();
+        co2Values.shift();
+        tempValues.shift();
+        humidityValues.shift();
+
+    }
+
+    drawGraph(
+        pmCtx,
+        pmValues,
+        "#9b42ff",
+        100
+    );
+
+    drawGraph(
+        co2Ctx,
+        co2Values,
+        "#20e879",
+        2000
+    );
+
+    drawEnvironment();
+}
+
+
+/* =====================================================
+   UPDATE DASHBOARD
+   ===================================================== */
+
+function updateDashboard(data){
+
+    const pm =
+        Number(data.pm25 || 0);
+
+    const co2 =
+        Number(data.co2 || 0);
+
+    const temp =
+        Number(data.temperature || 0);
+
+    const humidity =
+        Number(data.humidity || 0);
+
+    let aqi =
+        Number(data.aqi || 0);
+
+
+    /* CARDS */
+
+    document.getElementById("pm25")
+        .textContent =
+        pm.toFixed(0);
+
+    document.getElementById("co2")
+        .textContent =
+        co2.toFixed(0);
+
+    document.getElementById("temperature")
+        .textContent =
+        temp.toFixed(1);
+
+    document.getElementById("humidity")
+        .textContent =
+        humidity.toFixed(0);
+
+    document.getElementById("aqi")
+        .textContent =
+        aqi.toFixed(0);
+
+
+    /* LIVE */
+
+    document.getElementById("livePM")
+        .textContent =
+        pm.toFixed(0);
+
+    document.getElementById("liveCO2")
+        .textContent =
+        co2.toFixed(0);
+
+    document.getElementById("liveTemp")
+        .textContent =
+        temp.toFixed(1);
+
+    document.getElementById("liveHumidity")
+        .textContent =
+        humidity.toFixed(0);
+
+    document.getElementById("liveAQI")
+        .textContent =
+        aqi.toFixed(0);
+
+
+    /* PM STATUS */
+
+    const pmStatus =
+        document.getElementById(
+            "pmStatus"
+        );
+
+    if(pm <= 35){
+
+        pmStatus.textContent =
+            "Good";
+
+        pmStatus.className =
+            "good";
+
+    }else if(pm <= 55){
+
+        pmStatus.textContent =
+            "Moderate";
+
+        pmStatus.className =
+            "good warning";
+
+    }else{
+
+        pmStatus.textContent =
+            "High";
+
+        pmStatus.className =
+            "good danger";
+
+    }
+
+
+    /* CO2 STATUS */
+
+    const co2Status =
+        document.getElementById(
+            "co2Status"
+        );
+
+    if(co2 <= 1000){
+
+        co2Status.textContent =
+            "Normal";
+
+        co2Status.className =
+            "good";
+
+    }else if(co2 <= 1500){
+
+        co2Status.textContent =
+            "Elevated";
+
+        co2Status.className =
+            "good warning";
+
+    }else{
+
+        co2Status.textContent =
+            "High";
+
+        co2Status.className =
+            "good danger";
+
+    }
+
+
+    /* AQI */
+
+    let quality;
+
+    let qualityColor;
+
+    if(aqi <= 50){
+
+        quality = "Good";
+        qualityColor = "#20ef79";
+
+    }else if(aqi <= 100){
+
+        quality = "Moderate";
+        qualityColor = "#ffc107";
+
+    }else if(aqi <= 150){
+
+        quality = "Unhealthy";
+        qualityColor = "#ff8b20";
+
+    }else{
+
+        quality = "Poor";
+        qualityColor = "#ff4040";
+
+    }
+
+
+    const qualityEl =
+        document.getElementById(
+            "aqiQuality"
+        );
+
+    qualityEl.textContent =
+        quality;
+
+    qualityEl.style.color =
+        qualityColor;
+
+
+    /* AQI RING */
+
+    const circumference = 251;
+
+    const percent =
+        Math.min(aqi,200)/200;
+
+    document.getElementById(
+        "aqiRing"
+    ).style.stroke =
+        qualityColor;
+
+    document.getElementById(
+        "aqiRing"
+    ).style.strokeDashoffset =
+        circumference -
+        circumference*percent;
+
+
+    /* SENSOR STATUS */
+
+    setSensor(
+        "pmsSensor",
+        data.pms !== false
+    );
+
+    setSensor(
+        "mhzSensor",
+        data.mhz !== false
+    );
+
+    setSensor(
+        "bmeSensor",
+        data.bme !== false
+    );
+
+    setSensor(
+        "espSensor",
+        true
+    );
+
+
+    updateGraphs(
+        pm,
+        co2,
+        temp,
+        humidity
+    );
+
+
+    document.getElementById(
+        "lastUpdate"
+    ).textContent =
+        new Date().toLocaleTimeString();
+
+}
+
+
+/* =====================================================
+   SENSOR STATUS
+   ===================================================== */
+
+function setSensor(
+    id,
+    online
+){
+
+    const el =
+        document.getElementById(id);
+
+    if(online){
+
+        el.textContent =
+            "● Working";
+
+        el.style.color =
+            "#20ef79";
+
+    }else{
+
+        el.textContent =
+            "● Offline";
+
+        el.style.color =
+            "#ff4040";
+
+    }
+
+}
+
+
+/* =====================================================
+   ESP32 CONNECT
+   ===================================================== */
+
+async function connectESP32(){
+
+    if(!("serial" in navigator)){
+
+        alert(
+            "Web Serial supported nahi hai. Chrome ya Edge use karein."
+        );
+
+        return;
+    }
+
+    try{
+
+        port =
+            await navigator.serial.requestPort();
+
+        await port.open({
+            baudRate:115200
+        });
+
+
+        document.getElementById(
+            "dot"
+        ).classList.add("online");
+
+        document.getElementById(
+            "connection"
+        ).textContent =
+            "Device Online";
+
+        document.getElementById(
+            "deviceStatus"
+        ).textContent =
+            "Connected";
+
+
+        startReading();
+
+
+    }catch(error){
+
+        console.error(error);
+
+        alert(
+            "ESP32 connect nahi hua."
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   SERIAL READER
+   ===================================================== */
+
+async function startReading(){
+
+    const decoder =
+        new TextDecoder();
+
+    reader =
+        port.readable.getReader();
+
+    try{
+
+        while(true){
+
+            const {
+                value,
+                done
+            } =
+                await reader.read();
+
+            if(done){
+                break;
+            }
+
+            buffer +=
+                decoder.decode(value);
+
+            let lines =
+                buffer.split("\n");
+
+            buffer =
+                lines.pop();
+
+            for(
+                const line of lines
+            ){
+
+                parseSerialData(
+                    line.trim()
+                );
+
+            }
+
+        }
+
+    }catch(error){
+
+        console.error(error);
+
+    }finally{
+
+        reader.releaseLock();
+
+    }
+
+}
+
+
+/* =====================================================
+   PARSE ESP32 JSON
+   ===================================================== */
+
+function parseSerialData(line){
+
+    if(!line){
+        return;
+    }
+
+    console.log(
+        "ESP32:",
+        line
+    );
+
+    try{
+
+        const data =
+            JSON.parse(line);
+
+        updateDashboard(data);
+
+    }catch(error){
+
+        console.log(
+            "JSON nahi mila:",
+            line
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   CLOCK
+   ===================================================== */
+
+function updateClock(){
+
+    document.getElementById(
+        "clock"
+    ).textContent =
+        new Date()
+        .toLocaleTimeString();
+
+}
+
+setInterval(
+    updateClock,
+    1000
+);
+
+updateClock();
+
+
+/* =====================================================
+   DEMO MODE
+   =====================================================
+
+   Agar ESP32 connect nahi hai to dashboard
+   demo data dikhayega.
+*/
+
+let demoPM = 32;
+let demoCO2 = 780;
+let demoTemp = 26.4;
+let demoHumidity = 62;
+
+
+function demoMode(){
+
+    demoPM =
+        25 +
+        Math.random()*15;
+
+    demoCO2 =
+        700 +
+        Math.random()*180;
+
+    demoTemp =
+        25 +
+        Math.random()*3;
+
+    demoHumidity =
+        55 +
+        Math.random()*15;
+
+
+    const demoAQI =
+        Math.round(
+            demoPM*1.2
+        );
+
+
+    updateDashboard({
+
+        pm25:demoPM,
+
+        co2:demoCO2,
+
+        temperature:demoTemp,
+
+        humidity:demoHumidity,
+
+        aqi:demoAQI,
+
+        pms:true,
+
+        mhz:true,
+
+        bme:true
+
+    });
+
+}
+
+
+/*
+   Demo data sirf tab chalega jab ESP32
+   connected nahi hai.
+*/
+
+setInterval(()=>{
+
+    if(!port){
+
+        demoMode();
+
+    }
+
+},3000);
+
+</script>
+
+</body>
+</html>
